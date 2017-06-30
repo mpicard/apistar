@@ -6,6 +6,7 @@ import click
 
 from apistar import commands as cmd
 from apistar import core, routing, schema
+from apistar.exceptions import ConfigurationError
 
 DEFAULT_LOOKUP_CACHE_SIZE = 10000
 
@@ -96,6 +97,12 @@ def get_wsgi_server(app: App) -> Callable:
                 state[output] = function(**kwargs)
         except Exception as exc:
             state['exception'] = exc
+            custom_handler = app.settings.get('exception_handler')
+            if custom_handler:
+                try:
+                    custom_handler(exc)
+                except TypeError:
+                    raise ConfigurationError("exception_handler settings must be callable.")
             core.run_pipeline(app.router.exception_pipeline, state)
 
         wsgi_response = state['wsgi_response']

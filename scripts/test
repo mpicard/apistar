@@ -1,4 +1,5 @@
 #!/bin/sh -e
+rm -f test.db
 
 export PREFIX=""
 if [ -d 'venv' ] ; then

@@ -1,7 +1,9 @@
+from unittest.mock import MagicMock
+
 import pytest
 
 from apistar import App, Route
-from apistar.exceptions import APIException
+from apistar.exceptions import APIException, ConfigurationError
 from apistar.test import TestClient
 
 
@@ -40,3 +42,33 @@ def test_unhandled_exception_as_500():
     response = client.get('/unhandled_exception/')
     assert response.status_code == 500
     assert 'Traceback' in response.text
+
+
+def test_custom_exception_handler():
+    exception = Exception('What the ????')
+
+    def unhandled_exception():
+        raise exception
+    custom_exception_handler = MagicMock()
+    routes = [
+        Route('/unhandled_exception/', 'GET', unhandled_exception),
+    ]
+    settings = {'exception_handler': custom_exception_handler}
+    app = App(routes=routes, settings=settings)
+    client = TestClient(app, raise_500_exc=False)
+    response = client.get('/unhandled_exception/')
+    assert response.status_code == 500
+    custom_exception_handler.assert_called_with(exception)
+
+
+def test_custom_exception_handler_not_callable():
+    custom_exception_handler = 1
+
+    routes = [
+        Route('/unhandled_exception/', 'GET', unhandled_exception),
+    ]
+    settings = {'exception_handler': custom_exception_handler}
+    app = App(routes=routes, settings=settings)
+    client = TestClient(app, raise_500_exc=False)
+    with pytest.raises(ConfigurationError):
+        client.get('/unhandled_exception/')

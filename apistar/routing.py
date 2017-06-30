@@ -183,8 +183,7 @@ class Router(object):
         return matched_views[0].path.format(**url_params)
 
 
-def exception_handler(environ: wsgi.WSGIEnviron,
-                      exc: Exception) -> http.Response:
+def exception_handler(environ: wsgi.WSGIEnviron, exc: Exception) -> http.Response:
     if isinstance(exc, exceptions.Found):
         return http.Response('', exc.status_code, {'Location': exc.location})
 
