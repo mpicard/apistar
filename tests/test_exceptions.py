@@ -45,11 +45,10 @@ def test_unhandled_exception_as_500():
 
 
 def test_custom_exception_handler():
-    exception = Exception('What the ????')
+    custom_exception_handler = MagicMock()
 
     def unhandled_exception():
-        raise exception
-    custom_exception_handler = MagicMock()
+        raise Exception('What the ????')
     routes = [
         Route('/unhandled_exception/', 'GET', unhandled_exception),
     ]
@@ -58,7 +57,7 @@ def test_custom_exception_handler():
     client = TestClient(app, raise_500_exc=False)
     response = client.get('/unhandled_exception/')
     assert response.status_code == 500
-    custom_exception_handler.assert_called_with(exception)
+    custom_exception_handler.assert_called()
 
 
 def test_custom_exception_handler_not_callable():

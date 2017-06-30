@@ -100,7 +100,7 @@ def get_wsgi_server(app: App) -> Callable:
             custom_handler = app.settings.get('exception_handler')
             if custom_handler:
                 try:
-                    custom_handler(exc)
+                    custom_handler()
                 except TypeError:
                     raise ConfigurationError("exception_handler settings must be callable.")
             core.run_pipeline(app.router.exception_pipeline, state)
